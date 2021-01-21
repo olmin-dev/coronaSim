@@ -163,6 +163,8 @@ class Scene:
     _nb_restablished = 0
     _nb_quarantine = 0
     _nb_quarantine_healthy = 0
+    _tableau_des_ages = [[0 for i in range(int(__screenSize__[0]/__cellSize__))] for j in range(int(__screenSize__[0]/__cellSize__))]
+    _proba_age = [0.6,1.0,1.8]
 
     def __init__(self):
         pygame.init()
@@ -170,6 +172,22 @@ class Scene:
         self._grid = Grid()
         pygame.font.init()
         self.myfont = pygame.font.SysFont(None,25)
+        self.give_age()
+
+    def give_age(self) :
+        proba_choice = [0.33,0.33,0.33]
+        lst_age = range(3)
+        nb_age = [0,0,0]
+        for i in range(__gridDim__[0]) :
+            for j in range(__gridDim__[1]) :
+                choice = random.choices(lst_age,weights = proba_choice)[0]
+                proba_choice[choice] = max(proba_choice[choice]-0.05,0)
+                proba_choice[(choice+1)%2] += 0.025
+                proba_choice[(choice+2)%2] += 0.025
+                self._tableau_des_ages[i][j] = choice
+                nb_age[choice] += 1
+        print(nb_age)
+        return
 
     def drawMe(self): # Affichage de la grille
         if self._grid._grid is None:
@@ -228,7 +246,7 @@ class Scene:
             # Death
             self.cell_evolution(c, self._grid._grid[c[0],c[1]] == UNDETECTED_INFECTED and proba_action >= action_proba_d, 1 - survived_proba, RESTABLISHED, DEAD )
             # Infection
-            self.cell_evolution(c, self._grid._grid[c[0],c[1]] == HEALTHY and s > 0 and proba_action >= action_proba_i, 1 - (infection_proba)**s, UNDETECTED_INFECTED, HEALTHY )
+            self.cell_evolution(c, self._grid._grid[c[0],c[1]] == HEALTHY and s > 0 and proba_action >= action_proba_i, 1 - (infection_proba)**s*self._proba_age[self._tableau_des_ages[c[0]][c[1]]], UNDETECTED_INFECTED, HEALTHY )
 			# Quarantined death or survived
             self.cell_evolution(c, self._grid._grid[c[0],c[1]] == QUARANTINED_INFECTED and proba_action >= action_proba_d, 1 - survived_proba**(1/2), QUARANTINED_RESTABLISHED, DEAD )
             # Detected
@@ -299,7 +317,7 @@ if not sys.flags.interactive: main()
 # TODO:
 
 -> Infecter les gens qui voyagent XX
--> Les vieux et les jeunes
+-> Les vieux et les jeunes XX
 -> Stats en fonction des probas
 -> Readme pour expliquer les features
 """
