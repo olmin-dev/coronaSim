@@ -296,5 +296,10 @@ def main():
 if not sys.flags.interactive: main()
 
 """
+# TODO:
 
+-> Infecter les gens qui voyagent XX
+-> Les vieux et les jeunes
+-> Stats en fonction des probas
+-> Readme pour expliquer les features
 """
