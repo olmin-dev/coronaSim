@@ -7,7 +7,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import copy
 import sys
-
+import time
 # Paramètres
 
 __screenSize__ = (900,900)
@@ -169,7 +169,8 @@ class Scene:
     def __init__(self, printing=True):
         self._printing = printing
         pygame.init()
-        self._screen = pygame.display.set_mode((__screenSize__[0] + __HAS_LEGEND__ * 250, __screenSize__[1]))
+        if (printing):
+            self._screen = pygame.display.set_mode((__screenSize__[0] + __HAS_LEGEND__ * 250, __screenSize__[1]))
         self._grid = Grid()
         pygame.font.init()
         self.myfont = pygame.font.SysFont(None,25)
@@ -304,28 +305,35 @@ def main(infection_proba, survived_proba,detection_proba, action_proba_i, action
     clock = pygame.time.Clock()
     while done == False:
         scene.drawMe()
-        pygame.display.flip()
+        if printing:
+            pygame.display.flip()
         scene.updateRule(infection_proba, survived_proba,detection_proba, action_proba_i, action_proba_d)
         clock.tick(0)
+        if(nb_days != -1 and nb_days <= scene._day) :
+            done= True
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 print("Exiting")
                 done=True
-            if(nb_days != -1 and nb_days >= scene._day) :
-                done= True
+
     pygame.quit()
     return scene._nb_death, scene._nb_infected, scene._nb_restablished, scene._nb_quarantine, scene._nb_quarantine_healthy
 
 
 def make_stats_infect() :
+    pygame.init()
     tab_inf = []
     count1 = 0
-    linsp1 = np.linspace(0.01,0.8,45)
-    linsp2 = np.linspace(0.1,0.5,25)
+    linsp1 = np.linspace(0.01,0.8,4)
+    linsp2 = np.linspace(0.1,0.5,8)
     for detection_proba in linsp1 :
         tab_inf.append([])
         for infec_proba in linsp2 :
-            death,infect,restab,quarant,quarant_heal = main(infec_proba, 0.7, detection_proba, 0.8, 0.85,printing=False,nb_days=365)
+            print("detection proba:" + str(detection_proba) + ", infection_proba:" + str(infec_proba))
+            #start_time = time.time()
+            death,infect,restab,quarant,quarant_heal = main(infec_proba, 0.7, detection_proba, 0.8, 0.85,printing=False,nb_days=200)
+            #end_time = time.time()
+            #print(end_time - start_time)
             tab_inf[count1].append(infect)
         count1 += 1
     for i in range(len(linsp1)) :
@@ -334,7 +342,7 @@ def make_stats_infect() :
 
 
 
-#if not sys.flags.interactive: main()
+#if not sys.flags.interactive: main(0.6,0.7,0.9,0.8,0.85,printing=True,nb_days=365)
 make_stats_infect()
 """
 # TODO:
