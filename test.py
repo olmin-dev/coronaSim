@@ -4,7 +4,7 @@ import pygame.draw
 import numpy as np
 import random as rd
 import networkx as nx
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import copy
 import sys
 
@@ -166,7 +166,8 @@ class Scene:
     _tableau_des_ages = [[0 for i in range(int(__screenSize__[0]/__cellSize__))] for j in range(int(__screenSize__[0]/__cellSize__))]
     _proba_age = [0.6,1.0,1.8]
 
-    def __init__(self):
+    def __init__(self, printing=True):
+        self._printing = printing
         pygame.init()
         self._screen = pygame.display.set_mode((__screenSize__[0] + __HAS_LEGEND__ * 250, __screenSize__[1]))
         self._grid = Grid()
@@ -190,37 +191,38 @@ class Scene:
         return
 
     def drawMe(self): # Affichage de la grille
-        if self._grid._grid is None:
-            return
-        self._screen.fill((255,255,255))
-        for x in range(__gridDim__[0]):
-            for y in range(__gridDim__[1]):
+        if(self._printing):
+            if self._grid._grid is None:
+                return
+            self._screen.fill((255,255,255))
+            for x in range(__gridDim__[0]):
+                for y in range(__gridDim__[1]):
+                    pygame.draw.rect(self._screen,
+                            getColorCell(self._grid._grid.item((x,y))),
+                            (x*__cellSize__ + 1, y*__cellSize__ + 1, __cellSize__-2, __cellSize__-2))
+            if (__HAS_LEGEND__ == 1): # La jolie légende de Clément
                 pygame.draw.rect(self._screen,
-                        getColorCell(self._grid._grid.item((x,y))),
-                        (x*__cellSize__ + 1, y*__cellSize__ + 1, __cellSize__-2, __cellSize__-2))
-        if (__HAS_LEGEND__ == 1): # La jolie légende de Clément
-            pygame.draw.rect(self._screen,
-                    (0,0,0),
-                    (900, 0, 2,900))
-            for c, i in enumerate(__colors__):
-                pygame.draw.rect(self._screen, i, (91*__cellSize__ - 5, c * __cellSize__ * 3 + 5, __cellSize__ * 3 -2, __cellSize__ * 3-2))
-                pygame.draw.rect(self._screen, (0,0,0), (91*__cellSize__ - 5, c * __cellSize__ * 3 + 5, __cellSize__ * 3 -2, __cellSize__ * 3-2), 2)
-                textsurface = self.myfont.render(__colors_corr__[c], False, (0, 0, 0))
-                self._screen.blit(textsurface,(94 * __cellSize__, c * __cellSize__ * 3 + 10))
-            textsurface = self.myfont.render("Day:" + str(self._day), False, (0, 0, 0))
-            self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98))
-            textsurface = self.myfont.render("Dead:" + str(self._nb_death), False, (0, 0, 0))
-            self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98 - 20))
-            textsurface = self.myfont.render("Infected:" + str(self._nb_infected), False, (0, 0, 0))
-            self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98 - 40))
-            textsurface = self.myfont.render("Restablished:" + str(self._nb_restablished), False, (0, 0, 0))
-            self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98 - 60))
-            textsurface = self.myfont.render("Healthy:" + str(__gridDim__[0] ** 2 - self._nb_death - self._nb_infected - self._nb_restablished - self._nb_quarantine_healthy), False, (0, 0, 0))
-            self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98 - 80))
-            textsurface = self.myfont.render("Quarantine and healthy:" + str(self._nb_quarantine_healthy), False, (0, 0, 0))
-            self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98 - 100))
-            textsurface = self.myfont.render("Quarantine:" + str(self._nb_quarantine), False, (0, 0, 0))
-            self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98 - 120))
+                        (0,0,0),
+                        (900, 0, 2,900))
+                for c, i in enumerate(__colors__):
+                    pygame.draw.rect(self._screen, i, (91*__cellSize__ - 5, c * __cellSize__ * 3 + 5, __cellSize__ * 3 -2, __cellSize__ * 3-2))
+                    pygame.draw.rect(self._screen, (0,0,0), (91*__cellSize__ - 5, c * __cellSize__ * 3 + 5, __cellSize__ * 3 -2, __cellSize__ * 3-2), 2)
+                    textsurface = self.myfont.render(__colors_corr__[c], False, (0, 0, 0))
+                    self._screen.blit(textsurface,(94 * __cellSize__, c * __cellSize__ * 3 + 10))
+                textsurface = self.myfont.render("Day:" + str(self._day), False, (0, 0, 0))
+                self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98))
+                textsurface = self.myfont.render("Dead:" + str(self._nb_death), False, (0, 0, 0))
+                self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98 - 20))
+                textsurface = self.myfont.render("Infected:" + str(self._nb_infected), False, (0, 0, 0))
+                self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98 - 40))
+                textsurface = self.myfont.render("Restablished:" + str(self._nb_restablished), False, (0, 0, 0))
+                self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98 - 60))
+                textsurface = self.myfont.render("Healthy:" + str(__gridDim__[0] ** 2 - self._nb_death - self._nb_infected - self._nb_restablished - self._nb_quarantine_healthy), False, (0, 0, 0))
+                self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98 - 80))
+                textsurface = self.myfont.render("Quarantine and healthy:" + str(self._nb_quarantine_healthy), False, (0, 0, 0))
+                self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98 - 100))
+                textsurface = self.myfont.render("Quarantine:" + str(self._nb_quarantine), False, (0, 0, 0))
+                self._screen.blit(textsurface,(91 * __cellSize__, __screenSize__[0] * 0.98 - 120))
 
 
     def cell_evolution(self, c, condition, proba, evolve_if, evolve_else): # Fonction de factorisation, qui fait évoluer une cellule d'un état à un autre en fonction d'une proba
@@ -296,23 +298,44 @@ class Scene:
                 if self._grid._gridbis[i[0], i[1]] == QUARANTINED_RESTABLISHED:
                     self._grid._gridbis[i[0], i[1]] = RESTABLISHED
 
-def main():
-    scene = Scene()
+def main(infection_proba, survived_proba,detection_proba, action_proba_i, action_proba_d, printing=True, nb_days=-1) :
+    scene = Scene(printing=printing)
     done = False
     clock = pygame.time.Clock()
     while done == False:
         scene.drawMe()
         pygame.display.flip()
-        scene.updateRule(0.10, 0.7, 0.7, 0.8, 0.85)
+        scene.updateRule(infection_proba, survived_proba,detection_proba, action_proba_i, action_proba_d)
         clock.tick(0)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 print("Exiting")
                 done=True
+            if(nb_days != -1 and nb_days >= scene._day) :
+                done= True
     pygame.quit()
+    return scene._nb_death, scene._nb_infected, scene._nb_restablished, scene._nb_quarantine, scene._nb_quarantine_healthy
 
-if not sys.flags.interactive: main()
 
+def make_stats_infect() :
+    tab_inf = []
+    count1 = 0
+    linsp1 = np.linspace(0.01,0.8,45)
+    linsp2 = np.linspace(0.1,0.5,25)
+    for detection_proba in linsp1 :
+        tab_inf.append([])
+        for infec_proba in linsp2 :
+            death,infect,restab,quarant,quarant_heal = main(infec_proba, 0.7, detection_proba, 0.8, 0.85,printing=False,nb_days=365)
+            tab_inf[count1].append(infect)
+        count1 += 1
+    for i in range(len(linsp1)) :
+        plt.plot(linsp2,tab_inf[i])
+    plt.show()
+
+
+
+#if not sys.flags.interactive: main()
+make_stats_infect()
 """
 # TODO:
 
