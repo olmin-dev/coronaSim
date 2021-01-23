@@ -4,11 +4,15 @@ import pygame.draw
 import numpy as np
 import random as rd
 import networkx as nx
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import copy
 import sys
 import time
+import json
+from matplotlib.pyplot import *
 # Paramètres
+
+
 
 __screenSize__ = (900,900)
 __cellSize__ = 10
@@ -168,7 +172,6 @@ class Scene:
 
     def __init__(self, printing=True):
         self._printing = printing
-        pygame.init()
         if (printing):
             self._screen = pygame.display.set_mode((__screenSize__[0] + __HAS_LEGEND__ * 250, __screenSize__[1]))
         self._grid = Grid()
@@ -316,7 +319,7 @@ def main(infection_proba, survived_proba,detection_proba, action_proba_i, action
                 print("Exiting")
                 done=True
 
-    pygame.quit()
+    pygame.display.quit()
     return scene._nb_death, scene._nb_infected, scene._nb_restablished, scene._nb_quarantine, scene._nb_quarantine_healthy
 
 
@@ -324,8 +327,8 @@ def make_stats_infect() :
     pygame.init()
     tab_inf = []
     count1 = 0
-    linsp1 = np.linspace(0.01,0.8,4)
-    linsp2 = np.linspace(0.1,0.5,8)
+    linsp1 = np.linspace(0.01,0.8,8)
+    linsp2 = np.linspace(0.1,0.5,4)
     for detection_proba in linsp1 :
         tab_inf.append([])
         for infec_proba in linsp2 :
@@ -336,9 +339,10 @@ def make_stats_infect() :
             #print(end_time - start_time)
             tab_inf[count1].append(infect)
         count1 += 1
-    for i in range(len(linsp1)) :
-        plt.plot(linsp2,tab_inf[i])
-    plt.show()
+    with open('data.json','w') as outfile:
+        stats = [linsp1.tolist(),linsp2.tolist(),tab_inf]
+        json.dump(stats, outfile)
+    pygame.quit()
 
 
 
