@@ -70,6 +70,7 @@ class Grid:
     __moved_people__ = {}
 
     def __init__(self):
+        pygame.init()
         print("Creating a grid of dimensions " + str(__gridDim__))
         self._grid = np.zeros(__gridDim__, dtype='int8')
         self._gridbis = np.zeros(__gridDim__, dtype='int8')
@@ -326,11 +327,15 @@ def main(infection_proba, survived_proba,detection_proba, action_proba_i, action
 def make_stats_infect() :
     pygame.init()
     tab_inf = []
+    tab_death = []
+    tab_restab = []
     count1 = 0
     linsp1 = np.linspace(0.01,0.8,8)
     linsp2 = np.linspace(0.1,0.5,4)
     for detection_proba in linsp1 :
         tab_inf.append([])
+        tab_death.append([])
+        tab_restab.append([])
         for infec_proba in linsp2 :
             print("detection proba:" + str(detection_proba) + ", infection_proba:" + str(infec_proba))
             #start_time = time.time()
@@ -338,9 +343,11 @@ def make_stats_infect() :
             #end_time = time.time()
             #print(end_time - start_time)
             tab_inf[count1].append(infect)
+            tab_death[count1].append(death)
+            tab_restab[count1].append(restab)
         count1 += 1
     with open('data.json','w') as outfile:
-        stats = [linsp1.tolist(),linsp2.tolist(),tab_inf]
+        stats = [linsp1.tolist(),linsp2.tolist(),tab_inf, tab_death, tab_restab]
         json.dump(stats, outfile)
     pygame.quit()
 
